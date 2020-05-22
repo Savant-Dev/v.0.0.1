@@ -79,3 +79,10 @@ class Connector():
         status = bool(int(operation[-1:]))
 
         return status
+
+    async def executemany(self, statement: str, args: List[tuple]) -> None:
+        if not self.database:
+            await self.load_connection()
+
+        return await self.database.executemany(query, args)
+        
