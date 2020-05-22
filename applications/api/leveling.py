@@ -259,6 +259,18 @@ class API(database.Connector):
 
         return user
 
+    async def fetch_guild_ranks(self, *, guildId: int, userId: Optional[int], limit: Optional[int]):
+        '''
+            Either selects the first `limit` results ordered by experience OR
+            selects all records ordered by experience, and returns the position of the user specified
+        '''
+
+    async def fetch_global_ranks(self, *, userId: Optional[int], limit: Optional[int]):
+        '''
+            Either selects the first `limit` results ordered by experience OR
+            selects all records ordered by experience and returns the position of the user specified
+        '''
+
     async def insert_guild_user(self, *, guildId: int, userId: int) -> bool:
         overwrite = await self.check_existing(userId=userId, guildId=guildId)
 
