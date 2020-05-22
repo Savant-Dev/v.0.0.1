@@ -10,9 +10,6 @@ from ...api import leveling
 from ..utils.embeds import LevelingEmbeds
 
 
-
-
-
 class LevelingCog(leveling.API, commands.Cog):
     ''' Interface for Leveling/Leaderboards in Discord '''
 
