@@ -24,7 +24,7 @@ class LevelingEmbeds():
         return embed
 
     @classmethod
-    def report_guild(cls, profile: Any, *, member: Member) -> Embed:
+    def ReportGuildXP(cls, profile: Any, *, member: Member) -> Embed:
         embed = Embed(
             title = 'Guild XP Search Results',
             color = cls.color
@@ -60,7 +60,7 @@ class LevelingEmbeds():
         return cls.format(embed, user=member)
 
     @classmethod
-    def report_global(cls, profile: Any, *, member: Member) -> Embed:
+    def ReportGlobalXP(cls, profile: Any, *, member: Member) -> Embed:
         embed = Embed(
             title = 'Global XP Search Results',
             color = cls.color
