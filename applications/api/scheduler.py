@@ -4,7 +4,7 @@ import asyncio
 from pytz import utc
 from abc import abstractmethod
 from typing import Any, Union, Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from apscheduler.job import Job
 from apscheduler.events import *
@@ -58,7 +58,7 @@ class TaskNotFound(Exception):
         self.id = id
     def __str__(self):
         return self.id
-        
+
 
 class API():
     ''' Custom Scheduling for Long-Running Events '''
@@ -104,7 +104,7 @@ class API():
 
     @classmethod
     def time_converter(cls, *, duration: Union[str, int]):
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
 
         if isinstance(duration, int):
             return now + timedelta(seconds=duration)
