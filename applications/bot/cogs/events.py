@@ -15,7 +15,6 @@ class EventLogging(commands.Cog):
             }
         }
 
-
     @staticmethod
     def build_event():
         details = {

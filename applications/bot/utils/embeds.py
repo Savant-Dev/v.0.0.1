@@ -1,5 +1,5 @@
 from discord import Embed, Member
-from typing import Optional, List, Any
+from typing import Optional, Any
 
 
 # Embed Configuration
@@ -7,7 +7,9 @@ username = "Project S"
 avatar_url = "https://cdn.discordapp.com/attachments/697344429932937226/697344547381968976/Logo_-_Standalone.png"
 
 footer = "Provided By SimplySavant"
-footer_icon = "https://cdn.discordapp.com/attachments/697344429932937226/697345663486263336/1200px-Python-logo-notext.svg.png"
+footer_icon = (
+    "https://cdn.discordapp.com/attachments/697344429932937226/697345663486263336/1200px-Python-logo-notext.svg.png"
+)
 
 
 class LevelingEmbeds():

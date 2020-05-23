@@ -13,6 +13,7 @@ levels = {
     'CRITICAL': 5,
 }
 
+
 class LoggerModule():
     ''' Customized Colored Output Logger '''
 
@@ -24,7 +25,7 @@ class LoggerModule():
         directory = abspath(__file__).replace('logger.py', 'data/')
         self.logs = { key: directory + key for key in ['events', 'errors'] }
 
-    def _write(self, message: str, *, error: bool=False) -> None:
+    def _write(self, message: str, *, error: bool = False) -> None:
         with open(self.logs['events'], 'a+') as log:
             log.write(message)
 
