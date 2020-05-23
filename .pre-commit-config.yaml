@@ -14,7 +14,7 @@ repos:
     rev: v1.5.1
     hooks:
       - id: python-check-blanket-noqa
-  - repo: https://github.com/pycq/flake8
+  - repo: https://github.com/pycqa/flake8
     rev: 3.7.9
     hooks:
       - id: flake8
