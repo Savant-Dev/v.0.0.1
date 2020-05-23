@@ -181,7 +181,7 @@ class LevelingCog(leveling.API, commands.Cog):
 
         return await ctx.send(embed=embed)
 
-    @xp.command(name='force')
+    @xp.command(name='force', aliases=["overwrite", "edit"])
     @utils.developer_only()
     async def overwrite_user(self, ctx, member: discord.Member, experience: int):
         data = (ctx.guild.id, member.id, experience, 0)
