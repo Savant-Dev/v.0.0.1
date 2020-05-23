@@ -2,8 +2,9 @@ import uuid
 import asyncio
 
 from pytz import utc
+from os.path import abspath
 from abc import abstractmethod
-from typing import Any, Union, Callable
+from typing import Any, Union, Optional
 from datetime import datetime, timedelta, timezone
 
 from apscheduler.job import Job
@@ -82,7 +83,7 @@ class API():
     def _getSchedulerConfig() -> dict:
         config = {
             "jobstores": {
-                "default": SQLAlchemyJobStore(url='') # Configure Postgres Backend
+                "default": SQLAlchemyJobStore(url='')  # Configure Postgres Backend
             },
             "executors": {
                 "default": ThreadPoolExecutor(20)
@@ -120,7 +121,7 @@ class API():
             return now + timedelta(seconds=elapsing)
 
     @classmethod
-    def create_task(cls, id: Optional[str], function: str, *, args: tuple=(), kwargs: dict=()) -> TaskPayload:
+    def create_task(cls, id: Optional[str], function: str, *, args: tuple = (), kwargs: dict = {}) -> TaskPayload:
         if not id:
             id = cls.generate_task_id()
 
@@ -158,7 +159,7 @@ class API():
                 return self.log.error('scheduler', status_msg.format(event.job_id, event.exception))
 
     async def schedule(self, task: Union[str, TaskPayload],
-                        *, id: Optional[str], time: Union[datetime, int, str], args: tuple=(), kwargs: dict={}) -> str:
+                       *, id: Optional[str], time: Union[datetime, int, str], args: tuple = (), kwargs: dict = {}) -> str:
 
         if not isinstance(task, TaskPayload):
             task = self.create_task(id, task, args=args, kwargs=kwargs)

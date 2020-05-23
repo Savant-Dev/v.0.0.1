@@ -13,21 +13,25 @@ from . import ConfigurationError
 class NoBackupFound(Exception):
     def __init__(self, reason: Optional[str]):
         self.reason = reason
+
     def __str__(self):
         return getattr(self, 'reason', 'Unable to Locate Backup File')
+
 
 class UserOverwriteError(Exception):
     def __init__(self, reason: Optional[str]):
         self.reason = reason
+
     def __str__(self):
         return getattr(self, 'reason', 'Ignoring Overwrite Command')
+
 
 class GlobalPermissionsError(Exception):
     def __init__(self, reason: Optional[str]):
         self.reason = reason
+
     def __str__(self):
         return getattr(self, 'reason', 'You Cannot Edit Global Records')
-
 
 # Data Containers
 
@@ -43,7 +47,6 @@ class GuildUser(object):
             if attribute.lower() not in blocked:
                 setattr(self, attribute, value)
 
-        return
 
 class GlobalUser(object):
     def __init__(self, *, user: int):
@@ -55,9 +58,6 @@ class Statistic(object):
         if kwargs:
             for attribute, value in kwargs.items():
                 setattr(self, attribute, value)
-
-        return
-
 
 # Database Handler & Conversion API
 
@@ -204,7 +204,7 @@ class API(database.Connector):
         bounds = self.config["Boosts"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        boost.current = self.config["Boosts"]["Values"][i]
+        boost.current = self.config["Boosts"]["Values"][current]
 
         if not next and not remaining:
             boost.next = boost.remaining = 'Max Boost Earned!'
