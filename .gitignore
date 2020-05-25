@@ -1,2 +1,4 @@
 *.pyc
+*.env
+
 /applications/log/data
