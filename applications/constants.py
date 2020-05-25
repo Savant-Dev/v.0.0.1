@@ -39,10 +39,10 @@ def env_constructor(loader, node):
 yaml.SafeLoader.add_constructor("!ENV", env_constructor)
 yaml.SafeLoader.add_constructor("!REQUIRED_ENV", env_constructor)
 
-with open('../config-default.yaml', encoding="UTF-8") as f:
+with open('default-config.yml', encoding="UTF-8") as f:
     _config = yaml.safe_load(f)
 
-if Path("../config.yaml").exists():
+if Path("config.yml").exists():
     with open("../config.yaml", encoding="UTF-8") as f:
         _config = yaml.safe_load(f)
 

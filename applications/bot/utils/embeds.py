@@ -1,6 +1,7 @@
 from discord import Embed, Member
 from typing import Optional, Any
 
+from ...constants import Colors
 
 # Embed Configuration
 username = "Project S"
@@ -13,7 +14,7 @@ footer_icon = (
 
 
 class LevelingEmbeds():
-    color = 0x00ff00
+    color = Colors.soft_green
 
     @classmethod
     def format(cls, embed: Embed, *, user: Optional[Member]) -> Embed:
@@ -99,7 +100,7 @@ class LevelingEmbeds():
     def UserAlreadyExists(cls, member: Member) -> Embed:
         embed = Embed(
             title = 'Unable to Add User',
-            color = 0xff0000
+            color = Color.soft_red
         )
 
         embed.description = (
