@@ -1,0 +1,128 @@
+bot:
+  prefix:       "!"
+  token:        !ENV "discord_token"
+
+  avatar_url:   "https://cdn.discordapp.com/images/"
+
+styles:
+  colors:
+    soft_red:             0xcd6d6d
+    soft_green:           0x68c290
+    soft_orange:          0xf9ac54
+    soft_yellow:          0xe3c756
+
+  emojis:
+    check_mark:           "\u2705"
+    cross_mark:           "\u274C"
+    pencil:               "\u270F"
+
+  icons:
+    general_edit:         "https://cdn.discordapp.com/emojis"
+
+    message_edit:         "https://cdn.discordapp.com/emojis/"
+    message_delete:       "https://cdn.discordapp.com/emojis"
+    bulk_delete:          "https://cdn.discordapp.com/emojis/"
+
+    user_mute:            "https://cdn.discordapp.com/emojis"
+    user_unmute:          "https://cdn.discordapp.com/emojis"
+    user_updated:         "https://cdn.discordapp.com/emojis"
+    user_verified:        "https://cdn.discordapp.com/emojis"
+    user_banned:          "https://cdn.discordapp.com/emojis"
+    user_unbanned:        "https://cdn.discordapp.com/emojis"
+    user_warned:          "https://cdn.discordapp.com/emojis"
+
+    task_due:             "https://cdn.discordapp.com/emojis"
+    task_expired:         "https://cdn.discordapp.com/emojis"
+    task_submitted:       "https://cdn.discordapp.com/emojis"
+
+guild:
+  id: 1234567890
+
+  channels:
+    welcome:                            12345678901234567890
+    react_roles:                        12345678901234567890
+    announcements:                      12345678901234567890
+
+    event_logs:         &EVENT_LOGS     12345678901234567890
+    message_logs:       &MESSAGE_LOGS   12345678901234567890
+    moderator_logs:     &ACTION_LOGS    12345678901234567890
+
+    bot_commands: 12345678901234567890
+
+    mods:               &MOD_LOBBY      12345678901234567890
+    admins:             &ADMIN_LOBBY    12345678901234567890
+    alerts:             &STAFF_PINGS    12345678901234567890
+
+    staff_channels:
+      - *MOD_LOBBY
+      - *ADMIN_LOBBY
+      - *STAFF_PINGS
+
+    log_channels:
+      - *EVENT_LOGS
+      - *ACTION_LOGS
+      - *MESSAGE_LOGS
+
+  roles:
+    muted:              &MUTED_ROLE     12345678901234567890
+    blacklisted:        &BLACKLISTED    12345678901234567890
+
+    verified:                           12345678901234567890
+    announcements:                      12345678901234567890
+
+    owner:              &OWNER_ROLE     12345678901234567890
+    admins:             &ADMIN_ROLE     12345678901234567890
+    moderators:         &MODS_ROLE      12345678901234567890
+
+    staff_roles:
+      - *MODS_ROLE
+      - *ADMIN_ROLE
+      - *OWNER_ROLE
+
+    infraction_roles:
+      - *MUTED_ROLE
+      - *BLACKLISTED
+
+  webhooks:
+    developer_logs:     "https://discordapp.com/webhook/"
+
+filter:
+  word_watchlist:
+    - goo+ks*
+    - ky+s+
+    - ki+ke+s*
+    - beaner+s?
+    - coo+ns*
+    - nig+lets*
+    - slant-eyes*
+    - towe?l-?head+s*
+    - chi*n+k+s*
+    - spick*s*
+    - kill* +(?:yo)?urself+
+    - jew+s*
+    - suicide
+    - rape
+    - (re+)tar+(d+|t+)(ed)?
+    - ta+r+d+
+    - cunts*
+    - trann*y
+    - shemale
+    - fa+g+s*
+    - 卐
+    - 卍
+    - cuck(?!oo+)
+    - nigg+(?:e*r+|a+h*?|u+h+)s?
+    - fag+o+t+s*
+
+  channel_whitelist:
+    - *MOD_LOBBY
+    - *ADMIN_LOBBY
+    - *STAFF_PINGs
+    - *EVENT_LOGS
+    - *ACTION_LOGS
+    - *MESSAGE_LOGS
+
+  role_whitelist:
+    - *MODS_ROLE
+    - *ADMIN_ROLE
+    - *OWNER_ROLE
