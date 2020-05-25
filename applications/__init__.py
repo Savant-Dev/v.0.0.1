@@ -1,4 +1,6 @@
-from os import environ
+import os
+
+from dotenv import load_dotenv
 from multiprocessing import Process
 
 from .log import logger
@@ -16,9 +18,11 @@ class ProcessAllocation():
 
     @classmethod
     def fetch_tokens(cls) -> None:
+        load_dotenv()
+
         for key in ['discord_token', ]:
             try:
-                token = environ[key]
+                token = os.getenv(key)
             except KeyError:
                 log.warn('startup', f'Unable to Locate Token for {key}')
                 token = False
