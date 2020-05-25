@@ -1,2 +1,5 @@
 *.pyc
+*.env
+
 /applications/log/data
+/applications/config.yml
