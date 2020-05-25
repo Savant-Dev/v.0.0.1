@@ -1,17 +1,20 @@
 from discord import Embed, Member
-from typing import Optional, List, Any
+from typing import Optional, Any
 
+from ...constants import Colors
 
 # Embed Configuration
 username = "Project S"
 avatar_url = "https://cdn.discordapp.com/attachments/697344429932937226/697344547381968976/Logo_-_Standalone.png"
 
 footer = "Provided By SimplySavant"
-footer_icon = "https://cdn.discordapp.com/attachments/697344429932937226/697345663486263336/1200px-Python-logo-notext.svg.png"
+footer_icon = (
+    "https://cdn.discordapp.com/attachments/697344429932937226/697345663486263336/1200px-Python-logo-notext.svg.png"
+)
 
 
 class LevelingEmbeds():
-    color = 0x00ff00
+    color = Colors.soft_green
 
     @classmethod
     def format(cls, embed: Embed, *, user: Optional[Member]) -> Embed:
@@ -97,7 +100,7 @@ class LevelingEmbeds():
     def UserAlreadyExists(cls, member: Member) -> Embed:
         embed = Embed(
             title = 'Unable to Add User',
-            color = 0xff0000
+            color = Color.soft_red
         )
 
         embed.description = (

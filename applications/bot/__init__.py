@@ -1,11 +1,10 @@
 import json
-import asyncio
 import aiohttp
 
-from discord import LoginFailure
 from discord.ext import commands
+from discord import LoginFailure
+from discord import Embed, Message
 from typing import Any, Union, Optional
-from discord import User, Member, Embed, Message
 from discord import Webhook, AsyncWebhookAdapter
 
 from .cogs import ExtensionHandler
@@ -38,8 +37,6 @@ class DiscordBot(commands.Bot, infractions.API):
             message.set_author(name=webhook_name, icon_url=webhook_pfp)
             message.set_footer(text='Provided By SimplySavant')
 
-            is_embed = True
-
         async with aiohttp.ClientSession() as session:
             webhook = Webhook.from_url(url, adapter=AsyncWebhookAdapter(session))
             if isinstance(message, str):
@@ -58,6 +55,8 @@ class DiscordBot(commands.Bot, infractions.API):
 
         results = await super().fetchone(query, args)
         config = json.loads(results['settings'])
+
+        return config
 
         # Update Bot Attributes using getattr(), setattr()
         # Dispatch Webhook stating bot config has been updated

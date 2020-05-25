@@ -84,5 +84,4 @@ class Connector():
         if not self.database:
             await self.load_connection()
 
-        return await self.database.executemany(query, args)
-        
+        return await self.database.executemany(statement, args)

@@ -11,11 +11,13 @@ def developer_only():
 
     return commands.check(predicate)
 
+
 def private_command():
     async def predicate(ctx):
         return ctx.guild is None
 
     return commands.check(predicate)
+
 
 def channel_restricted(channels: List[Union[int, str]]):
     async def predicate(ctx):
@@ -27,5 +29,6 @@ def channel_restricted(channels: List[Union[int, str]]):
 class ConfigurationNotFound(Exception):
     def __init__(self, reason: Optional[str]):
         self.reason = reason
+        
     def __str__(self) -> str:
         return getattr(self, 'reason', 'Unable to Locate Configuration File')
