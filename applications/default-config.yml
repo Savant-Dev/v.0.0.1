@@ -1,128 +1,290 @@
-bot:
-  prefix:       "!"
-  token:        !ENV "discord_token"
+discord:
 
-  avatar_url:   "https://cdn.discordapp.com/images/"
+    bot:
+        prefix:               "!"
+        token:                !ENV "discord_token"
 
-styles:
-  colors:
-    soft_red:             0xcd6d6d
-    soft_green:           0x68c290
-    soft_orange:          0xf9ac54
-    soft_yellow:          0xe3c756
+        webhook_name:         "Project Savant"
+        webhook_icon:         "https://cdn.discordapp.com/"
 
-  emojis:
-    check_mark:           "\u2705"
-    cross_mark:           "\u274C"
-    pencil:               "\u270F"
+        developer_ids:
+            - 12345678901234567890
+            - 12345678901234567890
 
-  icons:
-    general_edit:         "https://cdn.discordapp.com/emojis"
+    guild:
+        id:                   1234567890123456789
 
-    message_edit:         "https://cdn.discordapp.com/emojis/"
-    message_delete:       "https://cdn.discordapp.com/emojis"
-    bulk_delete:          "https://cdn.discordapp.com/emojis/"
+        channels:
+            welcome:                              1234567890123456789
+            react_roles:                          1234567890123456789
+            announcements:                        1234567890123456789
 
-    user_mute:            "https://cdn.discordapp.com/emojis"
-    user_unmute:          "https://cdn.discordapp.com/emojis"
-    user_updated:         "https://cdn.discordapp.com/emojis"
-    user_verified:        "https://cdn.discordapp.com/emojis"
-    user_banned:          "https://cdn.discordapp.com/emojis"
-    user_unbanned:        "https://cdn.discordapp.com/emojis"
-    user_warned:          "https://cdn.discordapp.com/emojis"
+            sandbox:                              1234567890123456789
 
-    task_due:             "https://cdn.discordapp.com/emojis"
-    task_expired:         "https://cdn.discordapp.com/emojis"
-    task_submitted:       "https://cdn.discordapp.com/emojis"
+            event_logs:       &EVENT_LOGS         1234567890123456789
+            message_logs:     &MESSAGE_LOGS       1234567890123456789
+            moderator_logs:   &MODERATOR_LOGS     1234567890123456789
 
-guild:
-  id: 1234567890
+            mod_lobby:        &MOD_LOBBY          1234567890123456789
+            admin_lobby:      &ADMIN_LOBBY        1234567890123456789
+            staff_alerts:     &STAFF_ALERTS       1234567890123456789
 
-  channels:
-    welcome:                            12345678901234567890
-    react_roles:                        12345678901234567890
-    announcements:                      12345678901234567890
+            mail_inbox:       &INBOX_CHANNEL      1234567890123456789
 
-    event_logs:         &EVENT_LOGS     12345678901234567890
-    message_logs:       &MESSAGE_LOGS   12345678901234567890
-    moderator_logs:     &ACTION_LOGS    12345678901234567890
+            staff_channels:
+                - *MOD_LOBBY
+                - *ADMIN_LOBBY
+                - *STAFF_PINGS
 
-    bot_commands:                       12345678901234567890
+            log_channels:
+                - *EVENT_LOGS
+                - *MESSAGE_LOGS
+                - *MODERATOR_LOGS
 
-    mods:               &MOD_LOBBY      12345678901234567890
-    admins:             &ADMIN_LOBBY    12345678901234567890
-    alerts:             &STAFF_PINGS    12345678901234567890
+        roles:
+            muted:            &MUTED_ROLE         1234567890123456789
+            blacklisted:      &BLACKLISTED        1234567890123456789
 
-    staff_channels:
-      - *MOD_LOBBY
-      - *ADMIN_LOBBY
-      - *STAFF_PINGS
+            verified:                             1234567890123456789
+            announcements:                        1234567890123456789
 
-    log_channels:
-      - *EVENT_LOGS
-      - *ACTION_LOGS
-      - *MESSAGE_LOGS
+            owner:            &OWNER_ROLE         1234567890123456789
+            admins:           &ADMIN_ROLE         1234567890123456789
+            moderators:       &MODERATOR_ROLE     1234567890123456789
 
-  roles:
-    muted:              &MUTED_ROLE     12345678901234567890
-    blacklisted:        &BLACKLISTED    12345678901234567890
+            developer:        &DEVELOPER_ROLE     1234567890123456789
 
-    verified:                           12345678901234567890
-    announcements:                      12345678901234567890
+            staff_roles:
+                - *OWNER_ROLE
+                - *ADMIN_ROLE
+                - *MODERATOR_ROLE
+                - *DEVELOPER_ROLE
 
-    owner:              &OWNER_ROLE     12345678901234567890
-    admins:             &ADMIN_ROLE     12345678901234567890
-    moderators:         &MODS_ROLE      12345678901234567890
+            infraction_roles:
+                - *MUTED_ROLE
+                - *BLACKLISTED
 
-    staff_roles:
-      - *MODS_ROLE
-      - *ADMIN_ROLE
-      - *OWNER_ROLE
+        webhooks:
+            mail_inbox:       "https://discordapp.com/webhooks/"
 
-    infraction_roles:
-      - *MUTED_ROLE
-      - *BLACKLISTED
+            event_logs:       "https://discordapp.com/webhooks/"
+            message_logs:     "https://discordapp.com/webhooks/"
+            moderator_logs:   "https://discordapp.com/webhooks/"
 
-  webhooks:
-    developer_logs:     "https://discordapp.com/webhook/"
+            issues:           "https://discordapp.com/webhooks/"
+            workflow:         "https://discordapp.com/webhooks/"
+            developer_logs:   "https://discordapp.com/webhooks/"
 
-filter:
-  word_watchlist:
-    - goo+ks*
-    - ky+s+
-    - ki+ke+s*
-    - beaner+s?
-    - coo+ns*
-    - nig+lets*
-    - slant-eyes*
-    - towe?l-?head+s*
-    - chi*n+k+s*
-    - spick*s*
-    - kill* +(?:yo)?urself+
-    - jew+s*
-    - suicide
-    - rape
-    - (re+)tar+(d+|t+)(ed)?
-    - ta+r+d+
-    - cunts*
-    - trann*y
-    - shemale
-    - fa+g+s*
-    - 卐
-    - 卍
-    - cuck(?!oo+)
-    - nigg+(?:e*r+|a+h*?|u+h+)s?
-    - fag+o+t+s*
 
-  channel_whitelist:
-    - *MOD_LOBBY
-    - *ADMIN_LOBBY
-    - *STAFF_PINGs
-    - *EVENT_LOGS
-    - *ACTION_LOGS
-    - *MESSAGE_LOGS
+    style:
+        colors:
+            soft_red:         &SOFT_RED           0xcd6d6d
+            soft_green:       &SOFT_GREEN         0x68c290
+            soft_yellow:      &SOFT_YELLOW        0xf9ac54
+            soft_orange:      &SOFT ORANGE        0xe3c756
 
-  role_whitelist:
-    - *MODS_ROLE
-    - *ADMIN_ROLE
-    - *OWNER_ROLE
+        emojis:
+            pencil:           "\u270F"
+            check_mark:       "\u2705"
+            cross_mark:       "\u274C"
+
+        icons:
+            updated:          "https://cdn.discordapp.com/"
+
+            bulk_delete:      "https://cdn.discordapp.com/"
+            message_edit:     "https://cdn.discordapp.com/"
+            message_delete:   "https://cdn.discordapp.com/"
+
+            user_mute:        "https://cdn.discordapp.com/"
+            user_unmute:      "https://cdn.discordapp.com/"
+
+            user_ban:         "https://cdn.discordapp.com/"
+            user_unban:       "https://cdn.discordapp.com/"
+            user_warned:      "https://cdn.discordapp.com/"
+
+            user_updated:     "https://cdn.discordapp.com/"
+            user_verified:    "https://cdn.discordapp.com/"
+
+            task_expired:     "https://cdn.discordapp.com/"
+            task_submitted:   "https://cdn.discordapp.com/"
+            task_completed:   "https://cdn.discordapp.com/"
+
+    filter:
+        watchlist:
+            - goo+ks*
+            - ky+s+
+            - ki+ke+s*
+            - beaner+s?
+            - coo+ns*
+            - nig+lets*
+            - slant-eyes*
+            - towe?l-?head+s*
+            - chi*n+k+s*
+            - spick*s*
+            - kill* +(?:yo)?urself+
+            - jew+s*
+            - suicide
+            - rape
+            - (re+)tar+(d+|t+)(ed)?
+            - ta+r+d+
+            - cunts*
+            - trann*y
+            - shemale
+            - fa+g+s*
+            - 卐
+            - 卍
+            - cuck(?!oo+)
+            - nigg+(?:e*r+|a+h*?|u+h+)s?
+            - fag+o+t+s*
+
+        whitelisted_roles:
+            - *OWNER_ROLE
+            - *ADMIN_ROLE
+            - *MODERATOR_ROLE
+
+        whitelisted_channels:
+            - *MOD_LOBBY
+            - *ADMIN_LOBBY
+            - *STAFF_ALERTS
+            - *INBOX_CHANNEL
+
+            - *EVENT_LOGS
+            - *ACTION_LOGS
+            - *MESSAGE_LOGS
+
+apis:
+    webserver:
+        network_address:      "0.0.0.0"
+        network_port:         0000
+
+        database:             "INSERT_DATABASE_NAME"
+
+    events:
+        guild_updated:        *SOFT_GREEN
+        channel_created:      *SOFT_GREEN
+        channel_updated:      *SOFT_GREEN
+
+        message_edited:       *SOFT_YELLOW
+        message_deleted:      *SOFT_YELLOW
+        channel_deleted:      *SOFT_YELLOW
+
+        user_updated:         *SOFT_ORANGE
+        member_unmuted:       *SOFT_ORANGE
+        member_updated:       *SOFT_ORANGE
+        member_unbanned:      *SOFT_ORANGE
+
+        member_muted:         *SOFT_RED
+        member_warned:        *SOFT_RED
+        member_kicked:        *SOFT_RED
+        member_banned:        *SOFT_RED
+
+    leveling:
+        boosts:
+            values:
+                - 25
+                - 30
+                - 35
+                - 40
+                - 45
+                - 50
+                - 60
+                - 75
+                - 100
+                - 150
+                - 200
+
+            bounds:
+                - 0
+                - 25000
+                - 50000
+                - 100000
+                - 200000
+                - 350000
+                - 600000
+                - 1000000
+                - 2500000
+                - 6000000
+                - 10000000
+
+        leagues:
+            names:
+                - "Unranked"
+                - "Copper"
+                - "Bronze"
+                - "Silver"
+                - "Gold"
+                - "Diamond"
+                - "Masters"
+                - "Grand Master"
+                - "Champion"
+                - "Titan"
+
+            bounds:
+                - 0
+                - 5000
+                - 50000
+                - 200000
+                - 600000
+                - 1250000
+                - 2500000
+                - 5000000
+                - 10000000
+                - 20000000
+
+        prestiges:
+            names:
+                - "Not Prestiged"
+                - "1st Prestige"
+                - "2nd Prestige"
+                - "3rd Prestige"
+                - "4th Prestige"
+                - "5th Prestige"
+                - "Prestige Master"
+                - "Master Elite"
+
+            bounds:
+                - 0
+                - 50000
+                - 100000
+                - 150000
+                - 200000
+                - 250000
+                - 300000
+                - 1000000
+
+        levels:
+            base:
+                - 0
+                - 25
+                - 100
+                - 250
+                - 750
+                - 1500
+                - 3500
+                - 7500
+                - 15000
+                - 30000
+
+            master:
+                - 300000
+                - 320000
+                - 350000
+                - 400000
+                - 475000
+                - 560000
+                - 640000
+                - 720000
+                - 810000
+                - 900000
+
+            elite:
+                - 1000000
+                - 1100000
+                - 1250000
+                - 1500000
+                - 2000000
+                - 2750000
+                - 4000000
+                - 5500000
+                - 7500000
+                - 10000000
