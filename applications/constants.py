@@ -1,27 +1,20 @@
 import os
 import yaml
 
-from enum import Enum
+from typing import List
 from pathlib import Path
-from typing import Dict, List
-
-log = None
-
-default_path = ""
-config_path = ""
+from collections.abc import Mapping
 
 
-def set_logger(logger: Any):
-    global log
-
-    log = logger
+custom_path = Path("config.yml")
+default_path = Path("default-config.yml")
 
 
 def env_constructor(loader, node):
     default = None
 
-    if node.id == 'scaler':
-        value = loader.construct_scaler(node)
+    if node.id == 'scalar':
+        value = loader.construct_scalar(node)
         key = str(value)
 
     else:
@@ -36,18 +29,41 @@ def env_constructor(loader, node):
 
     return os.getenv(key, default)
 
+def ensure_settings(default, user):
+    for key, value in default.items():
+        if key not in user:
+            continue
+
+        if isinstance(value, Mapping):
+            if not any(isinstance(subvalue, Mapping) for subvalue in value.values()):
+                default[key].update(new[key])
+            ensure_settings(default[key], user[key])
+
+        else:
+            default[key] = user[key]
+
+
 yaml.SafeLoader.add_constructor("!ENV", env_constructor)
 yaml.SafeLoader.add_constructor("!REQUIRED_ENV", env_constructor)
 
-with open('default-config.yml', encoding="UTF-8") as f:
-    _config = yaml.safe_load(f)
 
-if Path("config.yml").exists():
-    with open("../config.yaml", encoding="UTF-8") as f:
-        _config = yaml.safe_load(f)
+with open(default_path, encoding="UTF-8") as f:
+    loaded_config = yaml.safe_load(f)
+    f.close()
+
+if custom_path.exists():
+    with open(custom_path, encoding="UTF-8") as f:
+        customized = yaml.safe_load(f)
+        f.close()
+
+    ensure_settings(loaded_config, customized)
+
+print('Loaded Configuration...')
 
 
 class YAMLGetter(type):
+    category = None
+    section = None
     subsection = None
 
     def __getattr__(cls, name):
@@ -55,20 +71,19 @@ class YAMLGetter(type):
 
         try:
             if cls.subsection:
-                return _config[cls.section][cls.subsection][name]
-            return _config[cls.section][name]
+                return loaded_config[cls.category][cls.section][cls.subsection][name]
 
-        except KeyError:
-            if cls.subsection:
-                path = '.'.join((cls.section, cls.subsection, name))
-            else:
-                path = '.'.join((cls.section, name))
+            elif cls.section:
+                return loaded_config[cls.category][cls.section][name]
 
-            if log:
-                log.critical('Configuration', f'Unable to Find YAML Path: {path}')
             else:
-                print(f'Unable to Access YAML Path: {path}')
-            raise
+                return loaded_config[cls.category][name]
+
+        except KeyError as exception:
+            path = '.'.join([getattr(cls, attribute, '[NULL]') for attribute in ['name', 'section', 'subsection']])
+            print(f'Unable to Find Configuration name: {path}')
+
+            raise exception
 
     def __getitem__(cls, name):
         return cls.__getattr__(name)
@@ -78,65 +93,30 @@ class YAMLGetter(type):
             yield name, getattr(cls, name)
 
 
-class Bot(metaclass=YAMLGetter):
+class BotConfig(metaclass=YAMLGetter):
+    category = "discord"
     section = "bot"
 
     prefix: str
     token: str
 
+    webhook_name: str
+    webhook_icon: str
 
-class Filter(metaclass=YAMLGetter):
+    developer_ids: List[int]
+
+class FilterConfig(metaclass=YAMLGetter):
+    category = "discord"
     section = "filter"
 
-    word_watchlist: List[str]
+    watchlist: List[str]
 
-    role_whitelist: List[int]
-    channel_whitelist: List[int]
-
-
-class Colors(metaclass=YAMLGetter):
-    section = "style"
-    subsection = "colors"
-
-    soft_red: int
-    soft_green: int
-    soft_orange: int
-    soft_yellow: int
-
-
-class Emojis(metaclass=YAMLGetter):
-    section = "style"
-    subsection = "emojis"
-
-    pencil: str
-    check_mark: str
-    cross_mark: str
-
-
-class Icons(metaclass=YAMLGetter):
-    section = "style"
-    subsection = "icons"
-
-    general_edit: str
-
-    bulk_delete: str
-    message_edit: str
-    message_delete: str
-
-    user_mute: str
-    user_unmute: str
-    user_updated: str
-    user_verfied: str
-    user_banned: str
-    user_unbanned: str
-    user_warned: str
-
-    task_due: str
-    task_expired: str
-    task_submitted: str
+    whitelisted_roles: List[str]
+    whitelisted_channels: List[str]
 
 
 class Channels(metaclass=YAMLGetter):
+    category = "discord"
     section = "guild"
     subsection = "channels"
 
@@ -148,17 +128,19 @@ class Channels(metaclass=YAMLGetter):
     message_logs: int
     moderator_logs: int
 
-    bot_commands: int
+    sandbox: int
+    mail_inbox: int
 
-    mods: int
-    admins: int
-    alerts: int
+    mod_lobby: int
+    admin_lobby: int
+    staff_alerts: int
 
     log_channels: List[int]
     staff_channels: List[int]
 
 
 class Roles(metaclass=YAMLGetter):
+    category = "discord"
     section = "guild"
     subsection = "roles"
 
@@ -172,35 +154,139 @@ class Roles(metaclass=YAMLGetter):
     admins: int
     moderators: int
 
+    developer: int
+
     staff_roles: List[int]
     infraction_roles: List[int]
 
+
 class Webhooks(metaclass=YAMLGetter):
+    category = "discord"
     section = "guild"
-    subsection = "webhoooks"
+    subsection = "webhooks"
+
+    mail_inbox: str
+
+    event_logs: str
+    message_logs: str
+    moderator_logs: str
 
     developer_logs: str
 
-class Event(Enum):
-    guild_update = "guild_update"
 
-    guild_role_create = "guild_role_create"
-    guild_role_delete = "guild_role_delete"
-    guild_role_update = "guild_role_update"
+class Colors(metaclass=YAMLGetter):
+    category = "discord"
+    section = "style"
+    subsection = "colors"
 
-    guild_channel_create = "guild_channel_create"
-    guild_channel_delete = "guild_channel_delete"
-    guild_channel_update = "guild_channel_update"
+    soft_red: int
+    soft_green: int
+    soft_yellow: int
+    soft_orange: int
 
-    member_ban = "member_ban"
-    member_unban = "member_unban"
 
-    member_join = "member_join"
-    member_remove = "member_remove"
+class Emojis(metaclass=YAMLGetter):
+    category = "discord"
+    section = "style"
+    subsection = "emojis"
 
-    member_update = "member_update"
+    pencil: str
+    check_mark: str
+    cross_mark: str
 
-    message_edit = "message_edit"
-    message_delete = "message_delete"
 
-    voice_state_update = "voice_state_update"
+class Icons(metaclass=YAMLGetter):
+    category = "discord"
+    section = "style"
+    subsection = "icons"
+
+    updated: str
+
+    bulk_delete: str
+    message_edit: str
+    message_delete: str
+
+    user_mute: str
+    user_unmute: str
+
+    user_ban: str
+    user_unban: str
+
+    user_warned: str
+
+    user_updated: str
+    user_verfied: str
+
+    task_expired: str
+    task_submitted: str
+    task_completed: str
+
+
+class WebServer(metaclass=YAMLGetter):
+    category = "apis"
+    section = "webserver"
+
+    network_port: int
+    network_address: str
+
+    database: str
+
+
+class EventConfig(metaclass=YAMLGetter):
+    category = "apis"
+    section = "events"
+
+    guild_updated: int
+    channel_created: int
+    channel_updated: int
+
+    message_edited: int
+    message_deleted: int
+    channel_deleted: int
+
+    user_updated: int
+    member_unmuted: int
+    member_updated: int
+    member_unbanned: int
+
+    member_muted: int
+    member_warned: int
+    member_kicked: int
+    member_banned: int
+
+
+class Boosts(metaclass=YAMLGetter):
+    category = "apis"
+    section = "leveling"
+    subsection = "boosts"
+
+    values: List[int]
+    bounds: List[int]
+
+
+class Leagues(metaclass=YAMLGetter):
+    category = "apis"
+    section = "leveling"
+    subsection = "leagues"
+
+    names: List[str]
+    bounds: List[int]
+
+
+class Prestiges(metaclass=YAMLGetter):
+    category = "apis"
+    section = "leveling"
+    subsection = "prestiges"
+
+    names: List[str]
+    bounds: List[int]
+
+
+class Levels(metaclass=YAMLGetter):
+    category = "apis"
+    section = "leveling"
+    subsection = "levels"
+
+    base: List[int]
+    master: List[int]
+    elite: List[int]
