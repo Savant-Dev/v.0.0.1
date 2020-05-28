@@ -10,6 +10,8 @@ from discord import Webhook, AsyncWebhookAdapter
 from .cogs import ExtensionHandler
 from ..api import infractions, database
 
+from ..constants import BotConfig, Webhooks
+
 
 # Webhook Configuration
 webhook_name = 'Project S'
@@ -25,7 +27,7 @@ class DiscordBot(commands.Bot, infractions.API):
 
     def __init__(self, log: Any, *args, **kwargs):
         self.log = log
-        self.developer_log = developer_url
+        self.developer_log = Webhooks.developer_logs
 
         commands.Bot.__init__(self, *args, **kwargs)
         infractions.API.__init__(self, log)
@@ -79,11 +81,17 @@ class DiscordBot(commands.Bot, infractions.API):
         url = event_details['log_channel']
         await self.dispatch_webhook(url=url, message=report)
 
+def get_prefix(bot: commands.Bot, message: Message) -> str:
+    return BotConfig.prefix
+
 
 def connect(token: str, logger: Any) -> None:
     client = DiscordBot(logger, command_prefix='!')
 
     ExtensionHandler.register_all(client)
+
+    if token != BotConfig.token:
+        return logger.critical('discord', 'Failed to verify tokens: Check your Environment Variables')
 
     try:
         client.run(token)

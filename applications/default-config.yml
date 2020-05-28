@@ -27,7 +27,7 @@ discord:
 
             mod_lobby:        &MOD_LOBBY          1234567890123456789
             admin_lobby:      &ADMIN_LOBBY        1234567890123456789
-            staff_alerts:     &STAFF_ALERTS       1234567890123456789
+            staff_alerts:     &STAFF_PINGS        1234567890123456789
 
             mail_inbox:       &INBOX_CHANNEL      1234567890123456789
 
@@ -81,7 +81,7 @@ discord:
             soft_red:         &SOFT_RED           0xcd6d6d
             soft_green:       &SOFT_GREEN         0x68c290
             soft_yellow:      &SOFT_YELLOW        0xf9ac54
-            soft_orange:      &SOFT ORANGE        0xe3c756
+            soft_orange:      &SOFT_ORANGE        0xe3c756
 
         emojis:
             pencil:           "\u270F"
@@ -145,12 +145,12 @@ discord:
         whitelisted_channels:
             - *MOD_LOBBY
             - *ADMIN_LOBBY
-            - *STAFF_ALERTS
+            - *STAFF_PINGS
             - *INBOX_CHANNEL
 
             - *EVENT_LOGS
-            - *ACTION_LOGS
             - *MESSAGE_LOGS
+            - *MODERATOR_LOGS
 
 apis:
     webserver:
