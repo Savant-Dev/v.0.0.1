@@ -1,11 +1,11 @@
 import socket
 
 from typing import Any, Optional, Tuple
-
+from ..constants import WebServer
 
 # Configure Database Server
-server_address = YOUR_DATABASE_IP_HERE
-access_port = YOUR_ACCESS_PORT_HERE
+access_port = WebServer.network_port
+server_address = WebServer.network_address
 
 
 class ServerPing():

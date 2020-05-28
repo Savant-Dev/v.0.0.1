@@ -6,8 +6,8 @@ from pathlib import Path
 from collections.abc import Mapping
 
 
-custom_path = Path("config.yml")
-default_path = Path("default-config.yml")
+custom_path = os.path.abspath(__file__).replace('constants.py', 'config.yml')
+default_path = os.path.abspath(__file__).replace('constants.py', 'default-config.yml')
 
 
 def env_constructor(loader, node):
@@ -36,7 +36,7 @@ def ensure_settings(default, user):
 
         if isinstance(value, Mapping):
             if not any(isinstance(subvalue, Mapping) for subvalue in value.values()):
-                default[key].update(new[key])
+                default[key].update(user[key])
             ensure_settings(default[key], user[key])
 
         else:
@@ -51,7 +51,7 @@ with open(default_path, encoding="UTF-8") as f:
     loaded_config = yaml.safe_load(f)
     f.close()
 
-if custom_path.exists():
+if Path(custom_path).exists():
     with open(custom_path, encoding="UTF-8") as f:
         customized = yaml.safe_load(f)
         f.close()

@@ -1,6 +1,8 @@
 from discord.ext import commands
 from discord import Message, Member, Role
 
+from ...constants import Webhooks
+
 
 class EventLogging(commands.Cog):
     ''' Logs Passive Events in the Server '''
@@ -9,11 +11,6 @@ class EventLogging(commands.Cog):
         self.bot = bot
         self.log = bot.log
 
-        self.config = {
-            "Event Logs": {
-                "686446006618947663": "Webhook URL Here"
-            }
-        }
 
     @staticmethod
     def build_event():
@@ -65,7 +62,7 @@ class EventLogging(commands.Cog):
                 f"**Updated:** ```{clean_after}```"
             )
 
-        event["log_channel"] = self.config["Event Logs"][str(before.guild.id)]
+        event["log_channel"] = Webhooks.message_logs
 
         await self.bot.log_event('message_edited', event_details=event)
 
@@ -83,7 +80,7 @@ class EventLogging(commands.Cog):
             f"**Original:** ```{message.content}```"
         )
 
-        event["log_channel"] = self.config["Event Logs"][str(message.guild.id)]
+        event["log_channel"] = Webhooks.message_logs
 
         await self.bot.log_event('message_deleted', event_details=event)
 
