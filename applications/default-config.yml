@@ -154,8 +154,8 @@ discord:
 
 apis:
     webserver:
-        network_address:      "0.0.0.0"
-        network_port:         0000
+        address:      "0.0.0.0"
+        port:         0000
 
         database:             "INSERT_DATABASE_NAME"
 
@@ -177,6 +177,12 @@ apis:
         member_warned:        *SOFT_RED
         member_kicked:        *SOFT_RED
         member_banned:        *SOFT_RED
+
+        aggressive:
+          - "member_muted"
+          - "member_warned"
+          - "member_kicked"
+          - "member_banned"
 
     leveling:
         boosts:

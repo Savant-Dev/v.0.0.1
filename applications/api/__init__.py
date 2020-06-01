@@ -4,8 +4,8 @@ from typing import Any, Optional, Tuple
 from ..constants import WebServer
 
 # Configure Database Server
-access_port = WebServer.network_port
-server_address = WebServer.network_address
+access_port = WebServer.port
+network_address = WebServer.address
 
 
 class ServerPing():
@@ -16,16 +16,16 @@ class ServerPing():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(3)
             try:
-                sock.connect((server_address, access_port))
+                sock.connect((network_address, access_port))
                 status = True
             except socket.timeout:
-                log.critical('database', f'Server Failed to Respond - {server_address}/{access_port}')
+                log.critical('database', f'Server Failed to Respond - {network_address}/{access_port}')
                 status = False
             except socket.error:
-                log.critical('database', f'Server ({server_address}/{access_port}) is Offline')
+                log.critical('database', f'Server ({network_address}/{access_port}) is Offline')
                 status = False
             else:
-                log.trace('database', f'Connection Established ({server_address}/{access_port})')
+                log.trace('database', f'Connection Established ({network_address}/{access_port})')
 
             sock.close()
 
