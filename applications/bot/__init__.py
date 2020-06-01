@@ -10,16 +10,12 @@ from discord import Webhook, AsyncWebhookAdapter
 from .cogs import ExtensionHandler
 from ..api import infractions, database
 
-from ..constants import BotConfig, Webhooks
+from ..constants import BotConfig, Webhooks, EventConfig
 
 
 # Webhook Configuration
 webhook_name = 'Project S'
 webhook_pfp = 'https://cdn.discordapp.com/attachments/697344429932937226/697344547381968976/Logo_-_Standalone.png'
-developer_url = 'Developer Webhook URL Here - Will be migrated to Database'
-
-# Event Configuration
-aggressive = ['member_ban', 'member_kick', 'member_warn', 'member_mute']
 
 
 class DiscordBot(commands.Bot, infractions.API):
@@ -73,7 +69,7 @@ class DiscordBot(commands.Bot, infractions.API):
         return config
 
     async def log_event(self, event: str, *, event_details: dict):
-        if event in aggressive:
+        if event in EventConfig.aggressive:
             report = await super().log_infraction(event, event_details)
         else:
             report = await super().log_passive(event, event_details)
@@ -86,7 +82,7 @@ def get_prefix(bot: commands.Bot, message: Message) -> str:
 
 
 def connect(token: str, logger: Any) -> None:
-    client = DiscordBot(logger, command_prefix='!')
+    client = DiscordBot(logger, command_prefix=get_prefix)
 
     ExtensionHandler.register_all(client)
 
