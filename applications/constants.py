@@ -226,8 +226,8 @@ class WebServer(metaclass=YAMLGetter):
     category = "apis"
     section = "webserver"
 
-    network_port: int
-    network_address: str
+    port: int
+    address: str
 
     database: str
 
@@ -254,6 +254,8 @@ class EventConfig(metaclass=YAMLGetter):
     member_kicked: int
     member_banned: int
 
+    aggressive: List[str]
+
 
 class Boosts(metaclass=YAMLGetter):
     category = "apis"
@@ -262,6 +264,8 @@ class Boosts(metaclass=YAMLGetter):
 
     values: List[int]
     bounds: List[int]
+
+    name = 'Boosts'
 
 
 class Leagues(metaclass=YAMLGetter):
@@ -272,6 +276,8 @@ class Leagues(metaclass=YAMLGetter):
     names: List[str]
     bounds: List[int]
 
+    name = 'Leagues'
+
 
 class Prestiges(metaclass=YAMLGetter):
     category = "apis"
@@ -281,6 +287,7 @@ class Prestiges(metaclass=YAMLGetter):
     names: List[str]
     bounds: List[int]
 
+    name = 'Prestiges'
 
 class Levels(metaclass=YAMLGetter):
     category = "apis"
@@ -290,3 +297,5 @@ class Levels(metaclass=YAMLGetter):
     base: List[int]
     master: List[int]
     elite: List[int]
+
+    name = 'Levels'

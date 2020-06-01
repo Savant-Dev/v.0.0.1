@@ -1,5 +1,5 @@
 from discord import Embed, Member
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 from ...constants import Colors
 
@@ -25,6 +25,31 @@ class LevelingEmbeds():
 
         # Set Timestamp
         return embed
+
+    @classmethod
+    def Configured(cls) -> Embed:
+        embed = Embed(
+            title = 'Extension Status Updated',
+            color = cls.color,
+            description = 'Leveling Extension has been Configured'
+        )
+
+        return cls.format(embed, user=None)
+
+    @classmethod
+    def UpdatedConfig(cls, changed: List[dict]) -> Embed:
+        embed = Embed(
+            title = 'Extension Status Updated',
+            color = cls.color,
+            description = 'New Leveling Configuration \n\n'
+        )
+
+        for change in changed:
+            for key, value in change.items():
+                embed.description += f'{key} --> {value} \n'
+
+
+        return cls.format(embed, user=None)
 
     @classmethod
     def ReportGuildXP(cls, profile: Any, *, member: Member) -> Embed:
@@ -123,3 +148,19 @@ class LevelingEmbeds():
         )
 
         return cls.format(embed, user=member)
+
+    '''
+        - NoChanges (for config)
+        - Reconfigured (for config)
+        - ProfileOverwrite (for logging)
+    '''
+
+
+class CheckFailures():
+    color = Colors.soft_red
+
+    '''
+        - DeveloperRestricted
+        - PrivateCommand
+        - ChannelRestriction(channels: List[Union[str, int]])
+    '''

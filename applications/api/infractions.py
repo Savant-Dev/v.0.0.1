@@ -4,30 +4,7 @@ from discord import Member, User, Embed
 from typing import Union, Optional, List, Any
 
 from . import database
-
-events = {
-    "user_updated": "Yellow",
-    "guild_updated": "Green",
-    "member_unbanned": "Yellow",
-    "member_updated": "Yellow",
-    "channel_created": "Green",
-    "channel_deleted": "Yellow",
-    "channel_updated": "Green",
-    "message_deleted": "Yellow",
-    "message_edited": "Yellow",
-
-    "member_banned": "Red",
-    "member_kicked": "Red",
-    "member_warned": "Red",
-    "member_muted": "Red"
-}
-
-colors = {
-    "Green": 0x32ed61,
-    "Yellow": 0xfcf403,
-    "Red": 0xfa3e3e,
-    "Blue": 0x3efaf4
-}
+from ..constants import EventConfig
 
 
 class InfractionNotFound(Exception):
@@ -48,7 +25,7 @@ class API(database.Connector):
 
     @staticmethod
     def build_embed(event: str, details: dict) -> Embed:
-        color = events[event]
+        color = getattr(EventConfig, event, 0x00ff00)
         event = event.replace('_', ' ').title()
 
         if not details["Moderator"]:
@@ -58,7 +35,7 @@ class API(database.Connector):
 
         embed = Embed(
             title = f'Event Logging --> {event}',
-            color = colors[color],
+            color = color,
             description = (
                 f'A __{event}__ Event was triggered by: {details["User"].mention} \n\n'
                 f'Moderator Influence: {moderator}\n'

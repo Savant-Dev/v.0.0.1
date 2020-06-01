@@ -1,34 +1,52 @@
 from discord.ext import commands
 from typing import Union, Optional, List
 
-# Configure Developer Access
-developer_ids = [654887208603615263, 496806918791102475]
+from .embeds import CheckFailures
+from ...constants import BotConfig
+
+
+class ConfigurationNotFound(Exception):
+    def __init__(self, reason: Optional[str]):
+        self.reason = reason
+
+    def __str__(self) -> str:
+        return getattr(self, 'reason', 'Unable to Locate Configuration File')
 
 
 def developer_only():
     async def predicate(ctx):
-        return ctx.author.id in developer_ids
+        if ctx.author.id not in BotConfig.developer_ids:
+            embed = CheckFailures.DeveloperRestricted()
+            await ctx.send(embed=embed)
+
+            return False
+
+        return True
 
     return commands.check(predicate)
 
 
 def private_command():
     async def predicate(ctx):
-        return ctx.guild is None
+        if ctx.guild is not None:
+            embed = CheckFailures.PrivateCommand()
+            await ctx.send(embed=embed)
+
+            return False
+
+        return True
 
     return commands.check(predicate)
 
 
 def channel_restricted(channels: List[Union[int, str]]):
     async def predicate(ctx):
-        return ctx.channel.id or ctx.channel.name in channels
+        if not (ctx.channel.id in channels or ctx.channel.name in channels):
+            embed = CheckFailures.ChannelRestriction(channels)
+            await ctx.send(embed=embed)
+
+            return False
+
+        return True
 
     return commands.check(predicate)
-
-
-class ConfigurationNotFound(Exception):
-    def __init__(self, reason: Optional[str]):
-        self.reason = reason
-        
-    def __str__(self) -> str:
-        return getattr(self, 'reason', 'Unable to Locate Configuration File')

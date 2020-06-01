@@ -3,7 +3,7 @@ import asyncio
 
 from typing import Optional, Any, List
 
-from . import server_address, access_port
+from ..constants import WebServer
 
 
 class Connector():
@@ -18,10 +18,10 @@ class Connector():
         self.database = await asyncpg.connect(
             user = self.child,
             password = self.child,
-            database = 'project-s',
+            database = WebServer.database,
 
-            host = server_address,
-            port = access_port
+            host = WebServer.address,
+            port = WebServer.port
         )
 
         self.log.info('database', f'Logged into Database as "{self.child}"')

@@ -7,6 +7,9 @@ from typing import Union, Optional, Any, List
 from . import database
 from . import ConfigurationError
 
+from ..constants import Boosts, Leagues
+from ..constants import Levels, Prestiges
+
 
 # Custom Exceptions
 
@@ -66,9 +69,33 @@ class API(database.Connector):
 
     def __init__(self, log: Any):
         self.log = log
-        self.config = None
+        self.api_config = None
 
         super().__init__('leveling-api', log)
+
+    @staticmethod
+    def get_static_config() -> dict:
+        config = {
+            "Boosts": {
+                "Values": Boosts.values,
+                "Bounds": Boosts.bounds
+            },
+            "Leagues": {
+                "Names": Leagues.names,
+                "Bounds": Leagues.bounds
+            },
+            "Prestiges": {
+                "Names": Prestiges.names,
+                "Bounds": Prestiges.bounds
+            },
+            "Levels": {
+                "0": Levels.base,
+                "1": Levels.master,
+                "2": Levels.elite
+            }
+        }
+
+        return config
 
     async def update_config(self):
         query = 'SELECT settings FROM configs WHERE name = $1'
@@ -77,10 +104,11 @@ class API(database.Connector):
         raw_config = await super().fetchone(query, args)
 
         try:
-            self.config = json.loads(raw_config["settings"])
+            self.api_config = json.loads(raw_config["settings"])
+            self.log.trace('startup', 'Loaded Leveling API configuration from Database')
         except:
-            # Load Config from Sample Config File
-            pass
+            self.api_config = self.get_static_config()
+            self.log.trace('startup', 'Loaded Leveling API configuration from local file')
 
         return
 
@@ -142,15 +170,15 @@ class API(database.Connector):
     def _getPrestige(self, *, xp: int) -> Statistic:
         prestige = Statistic()
 
-        bounds = self.config["Prestiges"]["Bounds"]
+        bounds = self.api_config["Prestiges"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        prestige.current = self.config["Prestiges"]["Names"][current]
+        prestige.current = self.api_config["Prestiges"]["Names"][current]
 
         if not next and not remaining:
             prestige.next = prestige.remaining = 'Max Prestige Reached!'
         else:
-            prestige.next = self.config["Prestiges"]["Names"][next]
+            prestige.next = self.api_config["Prestiges"]["Names"][next]
             prestige.remaining = remaining
 
         return prestige
@@ -161,7 +189,7 @@ class API(database.Connector):
         if set == '0':
             xp %= 50000
 
-        bounds = self.config["Levels"][set]
+        bounds = self.api_config["Levels"][set]
 
         i = 0
         for bound in bounds:
@@ -185,15 +213,15 @@ class API(database.Connector):
     def _getLeague(self, *, xp: int) -> Statistic:
         league = Statistic()
 
-        bounds = self.config["Leagues"]["Bounds"]
+        bounds = self.api_config["Leagues"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        league.current = self.config["Leagues"]["Names"][current]
+        league.current = self.api_config["Leagues"]["Names"][current]
 
         if not next and not remaining:
             league.next = league.remaining = 'Max League Achieved!'
         else:
-            league.next = self.config["Leagues"]["Names"][next]
+            league.next = self.api_config["Leagues"]["Names"][next]
             league.remaining = remaining
 
         return league
@@ -201,15 +229,15 @@ class API(database.Connector):
     def _getBoost(self, *, xp: int) -> Statistic:
         boost = Statistic()
 
-        bounds = self.config["Boosts"]["Bounds"]
+        bounds = self.api_config["Boosts"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        boost.current = self.config["Boosts"]["Values"][current]
+        boost.current = self.api_config["Boosts"]["Values"][current]
 
         if not next and not remaining:
             boost.next = boost.remaining = 'Max Boost Earned!'
         else:
-            boost.next = self.config["Boosts"]["Values"][next]
+            boost.next = self.api_config["Boosts"]["Values"][next]
             boost.remaining = remaining
 
         return boost
@@ -228,7 +256,7 @@ class API(database.Connector):
         return boost.current
 
     async def fetch_guild_user(self, *, guildId: int, userId: int) -> GuildUser:
-        if not self.config:
+        if not self.api_config:
             await self.update_config()
 
         query = 'SELECT * FROM guild_levels WHERE guild_id = $1 AND user_id = $2'
@@ -244,7 +272,7 @@ class API(database.Connector):
         return user
 
     async def fetch_global_user(self, *, userId: int) -> GlobalUser:
-        if not self.config:
+        if not self.api_config:
             await self.update_config()
 
         query = 'SELECT * FROM user_levels WHERE user_id = $1'
