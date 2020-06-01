@@ -15,9 +15,13 @@ class LevelingCog(leveling.API, commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.config = None
+        self.fresh_config = True
 
         leveling.API.__init__(self, self.bot.log)
 
+    def cog_unload(self):
+        self.reconfigure.cancel()
 
     # Extension Configuration
 
@@ -25,35 +29,56 @@ class LevelingCog(leveling.API, commands.Cog):
         self.bot.log.trace('discord', 'Configuring Leveling Extension ...')
 
         pulled = await self.bot.update_extension('leveling-cog')
-
+        print('Configured', self.config)
         self.config = pulled
-        embed = discord.Embed(
-            color = 0x00ff00,
-            description = 'Configured Leveling Extension'
-        )
 
-        self.bot.log.debug('discord', 'Successfully Configured Leveling Extension')
-        return await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
+        await super().update_config()
+
+        embed = LevelingEmbeds.Configured()
+        await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
+
+        return self.bot.log.debug('discord', 'Successfully Configured Leveling Extension')
 
     async def reconfigure(self):
-        self.bot.log.trace('discord', 'Reconfiguring Leveling Extension ...')
+        try:
+            if self.fresh_config:
+                self.bot.log.debug('discord', 'Fresh Configuration Detected - Skipping Loop ...')
+                self.fresh_config = False
+                return
 
-        pulled = await self.bot.update_extension('leveling-cog')
-        changing = [{key: value} for key, value in pulled.items() if self.config[key] != value]
+            self.bot.log.trace('discord', 'Reconfiguring Leveling Extension ...')
 
-        if len(changing) > 0:
-            embed = discord.Embed(
-                title = 'Updated Leveling Extension',
-                color = 0x00ff00,
-                description = '\n'.join([f"{key}: {self.config[key]} --> {changing[key]}" for key in changing])
-            )
+            await super().update_config()
 
-            self.config = pulled
-            await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
-            return self.bot.log.trace('discord', 'Leveling Extension has been Updated - Check Developer Logs')
+            pulled = await self.bot.update_extension('leveling-cog')
+            print(pulled)
 
-        else:
-            return self.bot.log.trace('discord', 'Skipping Leveling Extension ... No changes found')
+            if self.config:
+                changing = [{key: value} for key, value in pulled.items() if self.config[key] != value]
+            else:
+                changing = [{key: value} for key, value in pulled.items()]
+
+            if len(changing) > 0:
+                embed = LevelingEmbeds.UpdatedConfig(changed=changing)
+                await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
+
+                self.config = pulled
+                self.bot.log.trace('discord', 'Leveling Extension has been Updated - Check Developer Logs')
+
+            else:
+                return self.bot.log.trace('discord', 'Skipping Leveling Extension ... No changes found')
+        except Exception as e:
+            self.bot.log.error('discord', str(e))
+
+    @tasks.loop(minutes=30.0)
+    async def reconfigure_task(self):
+        await self.reconfigure()
+
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        await self.configure()
+        self.reconfigure_task.start()
 
     # End Region
 
@@ -62,11 +87,17 @@ class LevelingCog(leveling.API, commands.Cog):
 
     @commands.group(name='xp')
     @commands.guild_only()
-    async def xp(self, ctx):
+    async def xp(self, ctx, target: Optional[discord.Member]):
         if not ctx.invoked_subcommand:
-            return await ctx.message.delete()
+            await ctx.invoke(self.guild_search, target)
+
+    @xp.error
+    async def xp_errors(self, ctx, error):
+        if isinstance(error, commands.errors.CheckFailure):
+            return
 
     @xp.command(name='search')
+    @utils.channel_restricted(['bot-commands', ])
     async def guild_search(self, ctx, member: Optional[discord.Member]):
         if not member:
             member = ctx.author
@@ -77,6 +108,7 @@ class LevelingCog(leveling.API, commands.Cog):
         return await ctx.send(embed=embed)
 
     @xp.command(name='top10', aliases=["top", ])
+    @utils.channel_restricted(['bot-commands', ])
     async def guild_top10(self, ctx):
         profiles = await super().fetch_guild_ranks(guildId=ctx.guild.id, limit=10)
         embed = LevelingEmbeds.GuildTop10(profiles)
@@ -84,6 +116,7 @@ class LevelingCog(leveling.API, commands.Cog):
         return await ctx.send(embed=embed)
 
     @xp.command(name='rank')
+    @utils.channel_restricted('bot-commands')
     async def guild_ranking(self, ctx, user: Optional[discord.Member]):
         if not user:
             user = ctx.author
@@ -97,9 +130,10 @@ class LevelingCog(leveling.API, commands.Cog):
     # SubRegion: `!xp global` Base Commands
 
     @xp.group(name='global')
-    async def global_xp(self, ctx):
+    @utils.channel_restricted('bot-commands')
+    async def global_xp(self, ctx, target: Optional[discord.Member]):
         if not ctx.invoked_subcommand:
-            return await ctx.message.delete()
+            await ctx.invoke(self.global_search, target)
 
     @global_xp.command(name='search')
     async def global_search(self, ctx, member: Optional[discord.Member]):
@@ -186,6 +220,23 @@ class LevelingCog(leveling.API, commands.Cog):
     async def overwrite_user(self, ctx, member: discord.Member, experience: int):
         data = (ctx.guild.id, member.id, experience, 0)
         await super().force_insert(data, guild=True)
+
+        await ctx.invoke(self.guild_search, member)
+        return await ctx.send(embed=embed)
+
+    @xp.command(name='reconfigure', aliases=['configure', 'refresh'])
+    @utils.developer_only()
+    async def refresh_configuration(self, ctx):
+        self.bot.log.debug('discord', f'Leveling Extension is being reconfigured by: {ctx.author}')
+
+        changed = await self.reconfigure()
+
+        if not changed:
+            embed = LevelingEmbeds.NoChanges()
+        else:
+            embed = LevelingEmbeds.Reconfigured()
+
+        return await ctx.send(embed=embed)
 
 
 
