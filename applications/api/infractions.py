@@ -81,3 +81,48 @@ class API(database.Connector):
         report = self.build_embed(event, details)
 
         return report
+
+    async def fetch_infraction(self, *, id: int) -> Embed:
+        query = 'SELECT embed FROM infractions WHERE event_id = $1'
+        args = (id, )
+
+        result = await super().fetchone(query, args)
+
+        if result:
+            embed_data = json.loads(result['embed'])
+            embed = Embed.from_dict(embed_data)
+
+            return embed
+
+        else:
+            raise InfractionNotFound()
+
+    async def fetch_records(self, *, user_id: int, guild_id: Optional[int]) -> List[int]:
+        if guild_id:
+            query = 'SELECT event_id FROM infractions WHERE user_id = $1 AND guild_id = $2'
+            args = (user_id, guild_id)
+        else:
+            query = 'SELECT event_id FROM infractions WHERE user_id = $1'
+            args = (user_id, )
+
+        results = await super().fetchmany(query, args, limit=10)
+
+        if results:
+            case_ids = [record['event_id'] for record in results]
+
+            return case_ids
+
+        else:
+            raise InfractionNotFound('User does not have infractions')
+
+    async def remove_infraction(self, *, id: int) -> None:
+        query = 'DELETE FROM infractions WHERE event_id = $1'
+        args = (id, )
+
+        removed = await super().executeone(query, args)
+
+        if not removed:
+            raise InfractionNotFound()
+
+        return removed
+    
