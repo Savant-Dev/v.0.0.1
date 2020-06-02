@@ -150,11 +150,44 @@ class LevelingEmbeds():
         return cls.format(embed, user=member)
 
     '''
+        - GuildTop10
+        - GuildRanking
+        - GlobalTop10
+        - GlobalRanking
+        - Blacklisted
+        - Whitelisted
         - NoChanges (for config)
         - Reconfigured (for config)
         - ProfileOverwrite (for logging)
     '''
 
+class ModerationEmbeds():
+    color = Colors.soft_orange
+
+    @classmethod
+    def format(cls, embed: Embed, *, user: Optional[Member]) -> Embed:
+        embed.set_author(name=username, icon_url=avatar_url)
+        embed.set_footer(text=footer, icon_url=footer_icon)
+        if user:
+            embed.set_thumbnail(url=user.avatar_url)
+
+        # Set Timestamp
+        return embed
+
+    @classmethod
+    def BulkDelete(cls, *, searched: int, amount: int, author: Optional[Member]) -> Embed:
+        embed = Embed(
+            title = 'Message Bulk Delete',
+            color = cls.color
+        )
+
+        embed.description = (
+            f"Messages Searched: {searched} \n"
+            f"Messages Deleted: {amount} \n"
+            f"Filtered By: {author}"
+        )
+
+        return cls.format(embed, user=None)
 
 class CheckFailures():
     color = Colors.soft_red
