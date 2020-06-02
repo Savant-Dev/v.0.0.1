@@ -4,7 +4,7 @@ import aiohttp
 from discord.ext import commands
 from discord import LoginFailure
 from discord import Embed, Message
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, List
 from discord import Webhook, AsyncWebhookAdapter
 
 from .cogs import ExtensionHandler
@@ -76,6 +76,24 @@ class DiscordBot(commands.Bot, infractions.API):
 
         url = event_details['log_channel']
         await self.dispatch_webhook(url=url, message=report)
+
+    async def record_search(self, *, case: Optional[int], guild: Optional[int], user: Optional[int]) -> Union[Embed, List]:
+        if case:
+            result = await super().fetch_infraction(id=case)
+
+            return result
+
+        elif user:
+            try:
+                results = await super().fetch_records(user_id=user, guild_id=guild)
+            except infractions.InfractionNotFound as e:
+                raise e
+
+            return results
+
+        else:
+            raise ValueError('Insufficient Filter Values')
+    
 
 def get_prefix(bot: commands.Bot, message: Message) -> str:
     return BotConfig.prefix
