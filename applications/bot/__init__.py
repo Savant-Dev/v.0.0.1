@@ -68,14 +68,18 @@ class DiscordBot(commands.Bot, infractions.API):
 
         return config
 
-    async def log_event(self, event: str, *, event_details: dict):
+    async def log_event(self, event: str, *, event_details: Union[dict, Embed], log: str=None):
         if event in EventConfig.aggressive:
             report = await super().log_infraction(event, event_details)
         else:
             report = await super().log_passive(event, event_details)
 
-        url = event_details['log_channel']
-        await self.dispatch_webhook(url=url, message=report)
+        if not log:
+            url = event_details['log_channel']
+        else:
+            url = log
+
+        return await self.dispatch_webhook(url=url, message=report)
 
     async def record_search(self, *, case: Optional[int], guild: Optional[int], user: Optional[int]) -> Union[Embed, List]:
         if case:
@@ -93,7 +97,7 @@ class DiscordBot(commands.Bot, infractions.API):
 
         else:
             raise ValueError('Insufficient Filter Values')
-    
+
 
 def get_prefix(bot: commands.Bot, message: Message) -> str:
     return BotConfig.prefix

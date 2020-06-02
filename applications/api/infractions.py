@@ -52,8 +52,11 @@ class API(database.Connector):
 
         return status
 
-    async def log_infraction(self, event: str, details: dict) -> Embed:
-        report = self.build_embed(event, details)
+    async def log_infraction(self, event: str, details: Union[Embed, dict]) -> Embed:
+        if not isinstance(details, Embed):
+            report = self.build_embed(event, details)
+        else:
+            report = details
 
         try:
             guild = details["User"].guild.id
@@ -77,8 +80,11 @@ class API(database.Connector):
 
         return report
 
-    async def log_passive(self, event: str, details: dict) -> Embed:
-        report = self.build_embed(event, details)
+    async def log_passive(self, event: str, details: Union[Embed, dict]) -> Embed:
+        if not isinstance(details, Embed):
+            report = self.build_embed(event, details)
+        else:
+            report = details
 
         return report
 
@@ -125,4 +131,3 @@ class API(database.Connector):
             raise InfractionNotFound()
 
         return removed
-    
