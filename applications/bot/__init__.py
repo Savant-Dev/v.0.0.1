@@ -59,15 +59,6 @@ class DiscordBot(commands.Bot, infractions.API):
         # Update Bot Attributes using getattr(), setattr()
         # Dispatch Webhook stating bot config has been updated
 
-    async def update_extension(self, cog_name: str) -> None:
-        query = 'SELECT settings FROM configs WHERE name = $1'
-        args = (cog_name, )
-
-        results = await super().fetchone(query, args)
-        config = json.loads(results['settings'])
-
-        return config
-
     async def log_event(self, event: str, *, event_details: Union[dict, Embed], log: str=None):
         if event in EventConfig.aggressive:
             report = await super().log_infraction(event, event_details)
