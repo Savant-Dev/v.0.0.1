@@ -9,7 +9,7 @@ from ..constants import WebServer
 class Connector():
     ''' An Asynchronous Connection Handler for PostgreSQL '''
 
-    def __init__(self, child: str, log: Any):
+    def __init__(self, child: str, log: Optional[Any]):
         self.log = log
         self.child = child
         self.database = None
@@ -23,8 +23,8 @@ class Connector():
             host = WebServer.address,
             port = WebServer.port
         )
-
-        self.log.info('database', f'Logged into Database as "{self.child}"')
+        if self.log:
+            self.log.info('database', f'Logged into Database as "{self.child}"')
 
 
     # Region: Interface Functions

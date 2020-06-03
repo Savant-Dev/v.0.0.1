@@ -8,7 +8,7 @@ from .bot import connect
 from .api import ServerPing
 
 
-log = logger.getLogger(level='DEBUG')
+log = logger.getLogger(level='TRACE')
 
 
 class ProcessAllocation():

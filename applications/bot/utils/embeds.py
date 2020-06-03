@@ -12,9 +12,9 @@ footer_icon = (
     "https://cdn.discordapp.com/attachments/697344429932937226/697345663486263336/1200px-Python-logo-notext.svg.png"
 )
 
+class EmbedGen():
 
-class LevelingEmbeds():
-    color = Colors.soft_green
+    color: int
 
     @classmethod
     def format(cls, embed: Embed, *, user: Optional[Member]) -> Embed:
@@ -27,29 +27,20 @@ class LevelingEmbeds():
         return embed
 
     @classmethod
-    def Configured(cls) -> Embed:
+    def UpdatedConfiguration(cls, *, changed: List[dict]) -> Embed:
         embed = Embed(
-            title = 'Extension Status Updated',
-            color = cls.color,
-            description = 'Leveling Extension has been Configured'
+            title = 'Extension Configured',
+            color = Colors.soft_green
         )
+
+        formatted_changes = [f'**{change["attribute"]}**: {change["before"]} --> {change["after"]}' for change in changed]
+        embed.description = '\n'.join(formatted_changes)
 
         return cls.format(embed, user=None)
 
-    @classmethod
-    def UpdatedConfig(cls, changed: List[dict]) -> Embed:
-        embed = Embed(
-            title = 'Extension Status Updated',
-            color = cls.color,
-            description = 'New Leveling Configuration \n\n'
-        )
 
-        for change in changed:
-            for key, value in change.items():
-                embed.description += f'{key} --> {value} \n'
-
-
-        return cls.format(embed, user=None)
+class LevelingEmbeds(EmbedGen):
+    color = Colors.soft_green
 
     @classmethod
     def ReportGuildXP(cls, profile: Any, *, member: Member) -> Embed:
@@ -161,18 +152,9 @@ class LevelingEmbeds():
         - ProfileOverwrite (for logging)
     '''
 
-class ModerationEmbeds():
+class ModerationEmbeds(EmbedGen):
     color = Colors.soft_orange
 
-    @classmethod
-    def format(cls, embed: Embed, *, user: Optional[Member]) -> Embed:
-        embed.set_author(name=username, icon_url=avatar_url)
-        embed.set_footer(text=footer, icon_url=footer_icon)
-        if user:
-            embed.set_thumbnail(url=user.avatar_url)
-
-        # Set Timestamp
-        return embed
 
     @classmethod
     def BulkDelete(cls, *, searched: int, amount: int, author: Optional[Member]) -> Embed:
@@ -188,6 +170,22 @@ class ModerationEmbeds():
         )
 
         return cls.format(embed, user=None)
+
+
+class ErrorEmbeds(EmbedGen):
+    color = Colors.soft_red
+
+    @classmethod
+    def NoConfiugrationFound(cls, *, extension: str) -> Embed:
+        embed = Embed(
+            title = 'Unable to Locate Configuration',
+            color = cls.color
+        )
+
+        embed.description = f'A Configuration for the {extension} was not found in the database'
+
+        return cls.format(embed, user=None)
+
 
 class CheckFailures():
     color = Colors.soft_red
