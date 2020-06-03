@@ -7,8 +7,9 @@ from discord.ext import commands
 
 from .. import utils
 from ...api import leveling
+from ..utils.embeds import ErrorEmbeds
 from ..utils.embeds import LevelingEmbeds
-
+from ..utils.configure import ConfigWizard
 
 class LevelingCog(leveling.API, commands.Cog):
     ''' Interface for Leveling/Leaderboards in Discord '''
@@ -16,64 +17,45 @@ class LevelingCog(leveling.API, commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = None
-        self.fresh_config = True
 
         leveling.API.__init__(self, self.bot.log)
 
     def cog_unload(self):
-        self.reconfigure_task.cancel()
+        self.ensure_configuration.cancel()
 
     # Extension Configuration
 
     async def configure(self):
-        self.bot.log.trace('discord', 'Configuring Leveling Extension ...')
+        self.bot.log.trace('discord', 'Ensuring Configuration for Leveling Extension ...')
 
-        pulled = await self.bot.update_extension('leveling-cog')
-        self.config = pulled
+        wizard = ConfigWizard('leveling-cog')
+        fresh_config = await wizard.fetch_config()
 
-        await super().update_config()
+        if fresh_config:
+            changes = await wizard.detect_changes(self.config, fresh_config)
 
-        embed = LevelingEmbeds.Configured()
-        await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
+            if len(changes) > 0:
+                embed = LevelingEmbeds.UpdatedConfiguration(changed=changes)
+            else:
+                embed = None
 
-        return self.bot.log.debug('discord', 'Successfully Configured Leveling Extension')
+            self.config = fresh_config
+            self.bot.log.debug('discord', 'Leveling Extension has been configured!')
 
-    async def reconfigure(self):
-        if self.fresh_config:
-            self.bot.log.debug('discord', 'Fresh Configuration Detected - Skipping Loop ...')
-            self.fresh_config = False
-            return
-
-        self.bot.log.trace('discord', 'Reconfiguring Leveling Extension ...')
-
-        await super().update_config()
-
-        pulled = await self.bot.update_extension('leveling-cog')
-
-        if self.config:
-            changing = [{key: value} for key, value in pulled.items() if self.config[key] != value]
         else:
-            changing = [{key: value} for key, value in pulled.items()]
+            embed = ErrorEmbeds.NoConfigurationFound(extension='Leveling Extension')
 
-        if len(changing) > 0:
-            embed = LevelingEmbeds.UpdatedConfig(changed=changing)
+        if embed:
             await self.bot.dispatch_webhook(url=self.bot.developer_log, message=embed)
 
-            self.config = pulled
-            self.bot.log.trace('discord', 'Leveling Extension has been Updated - Check Developer Logs')
-
-        else:
-            return self.bot.log.trace('discord', 'Skipping Leveling Extension ... No changes found')
-
     @tasks.loop(minutes=30.0)
-    async def reconfigure_task(self):
-        await self.reconfigure()
+    async def ensure_configuration(self):
+        await self.configure()
 
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await self.configure()
-        self.reconfigure_task.start()
+        self.ensure_configuration.start()
 
     # End Region
 
