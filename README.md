@@ -1,6 +1,6 @@
 # Project S
 
-An all-in-one solution to your Discord Bot needs. Whatever you may need for your server, chances are this bot can provide. If a feature you need is not currently supported, you can create an issue proposing its addition using the `New Feature` tag. Once your request has been approved, a developer will start working on it.
+An all-in-one solution to your Discord Bot needs. Whatever you may need for your server, chances are this bot can provide. If a feature you need is not currently supported, you can create an issue proposing its addition using the `Feature Request` tag. Once your request has been approved, a Core Developer will change the status to `New Feature` and begin work.
 
 # Contributing
 
