@@ -1,5 +1,5 @@
 from discord import Embed, Member
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
 
 from ...constants import Colors
 
@@ -187,7 +187,7 @@ class ErrorEmbeds(EmbedGen):
         return cls.format(embed, user=None)
 
 
-class CheckFailures():
+class CheckFailures(EmbedGen):
     color = Colors.soft_red
 
     '''
@@ -195,3 +195,14 @@ class CheckFailures():
         - PrivateCommand
         - ChannelRestriction(channels: List[Union[str, int]])
     '''
+
+    @classmethod
+    def ChannelRestriction(cls, channels: List[Union[int, str]]) -> Embed:
+        embed = Embed(
+            title = 'Command Disabled',
+            color = cls.color
+        )
+
+        embed.description = f'This command can only be run in the following channels: ' + ', '.join(channels)
+
+        return cls.format(embed, user=None)
