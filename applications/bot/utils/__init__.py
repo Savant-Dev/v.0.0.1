@@ -12,6 +12,15 @@ class ConfigurationNotFound(Exception):
     def __str__(self) -> str:
         return getattr(self, 'reason', 'Unable to Locate Configuration File')
 
+def CheckOverrides(ctx):
+    if ctx.author.id in BotConfig.developer_ids:
+        return True
+
+    if ctx.guild and ctx.author.guild_permissions.administrator:
+        return True
+
+    return False
+
 
 def developer_only():
     async def predicate(ctx):
@@ -28,6 +37,9 @@ def developer_only():
 
 def private_command():
     async def predicate(ctx):
+        if CheckOverrides(ctx):
+            return True
+
         if ctx.guild is not None:
             embed = CheckFailures.PrivateCommand()
             await ctx.send(embed=embed)
@@ -41,7 +53,10 @@ def private_command():
 
 def channel_restricted(channels: List[Union[int, str]]):
     async def predicate(ctx):
-        if not (ctx.channel.id in channels or ctx.channel.name in channels):
+        if CheckOverrides(ctx):
+            return True
+
+        elif not (ctx.channel.id in channels or ctx.channel.name in channels):
             embed = CheckFailures.ChannelRestriction(channels)
             await ctx.send(embed=embed)
 

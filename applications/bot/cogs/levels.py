@@ -8,6 +8,7 @@ from discord.ext import commands
 from .. import utils
 from ...api import leveling
 from ..utils.embeds import ErrorEmbeds
+from ..utils.embeds import CheckFailures
 from ..utils.embeds import LevelingEmbeds
 from ..utils.configure import ConfigWizard
 
@@ -66,7 +67,13 @@ class LevelingCog(leveling.API, commands.Cog):
     @commands.guild_only()
     async def xp(self, ctx, target: Optional[discord.Member]):
         if not ctx.invoked_subcommand:
-            await ctx.invoke(self.guild_search, target)
+            command = self.bot.get_command('xp search')
+            available = await command.can_run(ctx)
+            if available:
+                return await ctx.invoke(self.guild_search, target)
+            else:
+                embed = CheckFailures.ChannelRestricted(['bot-commands', ])
+                return await ctx.send(embed=embed)
 
     @xp.command(name='search')
     @utils.channel_restricted(['bot-commands', ])
