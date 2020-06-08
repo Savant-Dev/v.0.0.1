@@ -50,8 +50,8 @@ class LevelingEmbeds(EmbedGen):
         )
 
         embed.description = (
-            f"Guild ID: {profile.guildId} \n"
-            f"User ID: {profile.userId} \n\n"
+            f"Guild ID: {profile.guild_id} \n"
+            f"User ID: {profile.user_id} \n\n"
             f"**Total Experience:** {profile.experience}\n"
             f"**Artificial Experience:** {profile.artificial} \n\n"
         )
@@ -86,7 +86,7 @@ class LevelingEmbeds(EmbedGen):
         )
 
         embed.description = (
-            f"User ID: {profile.userId} \n"
+            f"User ID: {profile.user_id} \n"
             f"**Total Experience:** {profile.experience}\n\n"
         )
 
