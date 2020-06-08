@@ -38,29 +38,68 @@ class GlobalPermissionsError(Exception):
 
 # Data Containers
 
-class GuildUser(object):
-    def __init__(self, *, user: int, guild: int):
-        self.userId = user
-        self.guildId = guild
+class GuildUser():
+    def __init__(self, guild: int, **kwargs):
+        self.guild_id = guild
 
-    def from_profile(self, *, data: dict) -> None:
-        blocked = ['user_id', 'guild_id']
+        for attribute in kwargs:
+            setattr(self, attribute, kwargs[attribute])
 
-        for attribute, value in data.items():
-            if attribute.lower() not in blocked:
-                setattr(self, attribute, value)
+    def __str__(self):
+        try:
+            message = (
+                f'User ID: {self.user_id} - Guild ID: {self.guild_id} - '
+                f'Prestige: {self.prestige.current} - Level: {self.level.current} - '
+                f'Current Experience: {self.experience}'
+            )
+        except AttributeError:
+            message = (
+                f'User ID: {self.user_id} - Guild ID: {self.guild_id} - '
+                f'Experience: {self.experience}'
+            )
+
+        return message
+
+    def __repr__(self):
+        return self.__str__()
 
 
-class GlobalUser(object):
-    def __init__(self, *, user: int):
-        self.userId = user
+class GlobalUser():
+    def __init__(self, **kwargs):
+        for attribute in kwargs:
+            setattr(self, attribute, kwargs[attribute])
+
+    def __str__(self):
+        try:
+            message = (
+                f'User ID: {self.user_id} - League: {self.league.current} - '
+                f'Boost Increment: {self.boost.current} - '
+                f'Current Experience: {self.experience}'
+            )
+        except AttributeError:
+            message = f'User ID: {self.user_id} - Current Experience: {self.experience}'
+
+        return message
+
 
 
 class Statistic(object):
     def __init__(self, **kwargs):
         if kwargs:
-            for attribute, value in kwargs.items():
-                setattr(self, attribute, value)
+            for attribute in kwargs:
+                setattr(self, attribute, kwargs[attribute])
+
+    def __str__(self):
+        message = (
+            f'Current: {self.current} - Next: {self.next} - '
+            f'Remaining: {self.remaining}'
+        )
+
+        return message
+
+    def __repr__(self):
+        return self.__str__()
+
 
 # Database Handler & Conversion API
 
@@ -168,18 +207,22 @@ class API(database.Connector):
             return '2'
 
     def _getPrestige(self, *, xp: int) -> Statistic:
-        prestige = Statistic()
-
         bounds = self.api_config["Prestiges"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        prestige.current = self.api_config["Prestiges"]["Names"][current]
+        current = self.api_config["Prestiges"]["Names"][current]
 
         if not next and not remaining:
-            prestige.next = prestige.remaining = 'Max Prestige Reached!'
+            next = remaining = 'Max Prestige Reached!'
         else:
-            prestige.next = self.api_config["Prestiges"]["Names"][next]
-            prestige.remaining = remaining
+            next = self.api_config["Prestiges"]["Names"][next]
+            remaining = remaining
+
+        prestige = Statistic(
+            current = current,
+            next = next,
+            remaining = remaining
+        )
 
         return prestige
 
@@ -199,30 +242,39 @@ class API(database.Connector):
                 remaining = bound - xp
                 break
 
-        level = Statistic()
-        level.current = f'Level {i}'
+        current = f'Level {i}'
         if i == 10:
-            level.next = 'Prestige Available Soon ...'
+            next = 'Prestige Available Soon ...'
         else:
-            level.next = f'Level {i+1}'
+            next = f'Level {i+1}'
 
-        level.remaining = remaining
+        remaining = remaining
+
+        level = Statistic(
+            current = current,
+            next = next,
+            remaining = remaining
+        )
 
         return level
 
     def _getLeague(self, *, xp: int) -> Statistic:
-        league = Statistic()
-
         bounds = self.api_config["Leagues"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        league.current = self.api_config["Leagues"]["Names"][current]
+        current = self.api_config["Leagues"]["Names"][current]
 
         if not next and not remaining:
-            league.next = league.remaining = 'Max League Achieved!'
+            next = remaining = 'Max League Achieved!'
         else:
-            league.next = self.api_config["Leagues"]["Names"][next]
-            league.remaining = remaining
+            next = self.api_config["Leagues"]["Names"][next]
+            remaining = remaining
+
+        league = Statistic(
+            current = current,
+            next = next,
+            remaining = remaining
+        )
 
         return league
 
@@ -232,13 +284,19 @@ class API(database.Connector):
         bounds = self.api_config["Boosts"]["Bounds"]
         current, next, remaining = self._iterate(value=xp, bounds=bounds)
 
-        boost.current = self.api_config["Boosts"]["Values"][current]
+        current = self.api_config["Boosts"]["Values"][current]
 
         if not next and not remaining:
-            boost.next = boost.remaining = 'Max Boost Earned!'
+            next = remaining = 'Max Boost Earned!'
         else:
-            boost.next = self.api_config["Boosts"]["Values"][next]
-            boost.remaining = remaining
+            next = self.api_config["Boosts"]["Values"][next]
+            remaining = remaining
+
+        boost = Statistic(
+            current = current,
+            next = next,
+            remaining = remaining
+        )
 
         return boost
 
@@ -263,11 +321,18 @@ class API(database.Connector):
         args = (guildId, userId)
 
         results = await super().fetchone(query, args)
-        user = GuildUser(user=userId, guild=guildId)
-        user.from_profile(data=dict(results))
+        experience = results['experience']
 
-        user.prestige = self._getPrestige(xp=user.experience)
-        user.level = self._getLevel(xp=user.experience, set=None)
+        prestige = self._getPrestige(xp=experience)
+        level = self._getLevel(xp=experience, set=None)
+
+        user = GuildUser(guildId,
+            user_id = userId,
+            experience = results['experience'],
+            artificial = results['artificial'],
+            prestige = prestige,
+            level = level
+        )
 
         return user
 
@@ -279,11 +344,17 @@ class API(database.Connector):
         args = (userId, )
 
         results = await super().fetchone(query, args)
-        user = GlobalUser(user=userId)
-        user.experience = results["experience"]
+        experience = results['experience']
 
-        user.league = self._getLeague(xp=user.experience)
-        user.boost = self._getBoost(xp=user.experience)
+        league = self._getLeague(xp=experience)
+        boost = self._getBoost(xp=experience)
+
+        user = GlobalUser(
+            user_id = userId,
+            experience = experience,
+            league = league,
+            boost = boost
+        )
 
         return user
 
