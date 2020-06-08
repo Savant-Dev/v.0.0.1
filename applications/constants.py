@@ -3,6 +3,7 @@ import yaml
 
 from typing import List
 from pathlib import Path
+from dotenv import load_dotenv
 from collections.abc import Mapping
 
 
@@ -12,6 +13,7 @@ default_path = os.path.abspath(__file__).replace('constants.py', 'default-config
 
 def env_constructor(loader, node):
     default = None
+    load_dotenv()
 
     if node.id == 'scalar':
         value = loader.construct_scalar(node)
