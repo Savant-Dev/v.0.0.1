@@ -36,6 +36,7 @@ class GlobalPermissionsError(Exception):
     def __str__(self):
         return getattr(self, 'reason', 'You Cannot Edit Global Records')
 
+
 # Data Containers
 
 class GuildUser():
@@ -80,7 +81,6 @@ class GlobalUser():
             message = f'User ID: {self.user_id} - Current Experience: {self.experience}'
 
         return message
-
 
 
 class Statistic(object):
